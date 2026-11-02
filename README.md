@@ -10,6 +10,6 @@ An accurate arrangement of all eight planets orbiting around the sun with camera
 Add smooth camera movement, dynamic, detailed lighting, and a starfield background.
 
 ## Tech Stack
-**Languages:** C, CMake
-**Libraries:** Glad, GLFW, Libcurl, JQ
-**Tools:** Emscripten, NASA JPL Horizons API
+* **Languages:** C, CMake
+* **Libraries:** Glad, GLFW, Libcurl, JQ
+* **Tools:** Emscripten, NASA JPL Horizons API

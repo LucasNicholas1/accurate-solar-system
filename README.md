@@ -1,6 +1,6 @@
 # accurate-solar-system
 
-[Eisenhower Matrix.pdf](https://github.com/user-attachments/files/34250857/Eisenhower.Matrix.pdf)
+![Eisenhower Matrix and Flow Chart](https://github.com/user-attachments/files/34250857/Eisenhower.Matrix.pdf)
 
 ## Goal
 Create a representation of our solar system that is accurate in scale, timing, and arrangement that can be run in your browser with high fidelity.

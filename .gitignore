@@ -1,0 +1,22 @@
+*.d
+*.slo
+*.lo
+*.o
+*.obj
+
+*.gch
+*.pch
+
+*.exe
+*.exe manifest
+*.pdb
+
+CMakeCache.txt
+CMakeFiles/
+cmake-build-debug/
+cmake-build-release/
+_deps/
+.idea/
+.tmp/
+.build/
+.cache/

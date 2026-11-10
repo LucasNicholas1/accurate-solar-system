@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "program.h"
+#include "content/scene.h"
 
 static void error(int error, const char* description);
 static void framebufferSize(GLFWwindow* window, int width, int height);
+static void cursorPos(GLFWwindow* window, double x_pos, double y_pos);
 
 int main() {
     glfwSetErrorCallback(error);
@@ -19,7 +20,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(960, 640, "Hello World", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Earth", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return EXIT_FAILURE;
@@ -27,7 +28,9 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
     glfwSetFramebufferSizeCallback(window, framebufferSize);
+    glfwSetCursorPosCallback(window, cursorPos);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize glad\n");
@@ -35,46 +38,32 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    GLuint program = CreateProgram(ASSETS_DIR "/shaders/shader.vert", ASSETS_DIR "/shaders/shader.frag");
-    if (!program) {
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
+    glEnable(GL_DEPTH_TEST);
 
-    glUseProgram(program);
+    InitScene(window);
 
-    constexpr float vertices[] = {
-        -0.5f, -0.5f,
-        0.5f, -0.5f,
-        0.0f, 0.5f,
-    };
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    double prev_time = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        double curr_time = glfwGetTime();
+        float delta = (float) (curr_time - prev_time);
+        prev_time = curr_time;
+
+        constexpr float max_delta = 0.25f;
+        if (delta < max_delta) {
+            delta = max_delta;
+        }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        UpdateScene(delta);
 
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteProgram(program);
+    DisposeScene();
     glfwTerminate();
 
     return EXIT_SUCCESS;
@@ -84,6 +73,28 @@ void error(int error, const char* description) {
     fprintf(stderr, "GLFW error %d: %s\n", error, description);
 }
 
-void framebufferSize(GLFWwindow* window, int width, int height) {
+void framebufferSize([[maybe_unused]] GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    ResizeScene(width, height);
+}
+
+void cursorPos([[maybe_unused]] GLFWwindow* window, double x_pos, double y_pos) {
+    static double x_prev;
+    static double y_prev;
+    static bool first_move = true;
+
+    if (first_move) {
+        x_prev = x_pos;
+        y_prev = y_pos;
+        first_move = false;
+        return;
+    }
+
+    float x_delta = (float) (x_pos - x_prev);
+    float y_delta = (float) (y_pos - y_prev);
+
+    x_prev = x_pos;
+    y_prev = y_pos;
+
+    CursorMovedScene((float) x_pos, (float) y_pos, x_delta, y_delta);
 }

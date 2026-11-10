@@ -28,11 +28,29 @@ target_include_directories(glad PUBLIC external/glad/include)
 
 add_executable(accurate_solar_system
         src/main.c
-        src/program.h
-        src/program.c
+        src/tools/program.h
+        src/tools/program.c
+        src/content/scene.h
+        src/content/scene.c
+        src/content/planet/planet.h
+        src/content/planet/planet.c
+        src/content/planet/sphere.c
+        src/content/planet/sphere.h
+        src/content/camera/camera.c
+        src/content/camera/camera.h
+        src/tools/texture.c
+        src/tools/texture.h
+        src/content/planet/planet_meta.c
+        src/content/planet/planet_meta.h
+        src/content/planet/planets.c
+        src/content/planet/planets.h
 )
 
-target_link_libraries(accurate_solar_system PRIVATE glfw glad cglm)
+add_library(stbi STATIC external/stbi/src/stb_image.c)
+
+target_include_directories(accurate_solar_system PRIVATE external/stbi/include)
+
+target_link_libraries(accurate_solar_system PRIVATE glfw glad cglm stbi)
 
 target_compile_definitions(accurate_solar_system PRIVATE
         ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"

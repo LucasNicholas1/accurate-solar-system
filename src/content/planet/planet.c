@@ -2,7 +2,7 @@
 
 #include "planet_meta.h"
 #include "sphere.h"
-#include "../camera/camera.h"
+#include "fetcher.h"
 #include "../../tools/texture.h"
 #include <glad/glad.h>
 #include <cglm/cglm.h>
@@ -16,7 +16,7 @@ Planet CreatePlanet(PlanetType type) {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    constexpr int res = 64;
+    constexpr int res = 8;
     float vertices[GetSphereComponentCount(res)];
     GenerateSphere(res, vertices);
     glBufferData(GL_ARRAY_BUFFER, (GLsizei) sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -42,7 +42,7 @@ Planet CreatePlanet(PlanetType type) {
 
     int vertex_count = GetSphereVertexCount(res);
 
-    return (Planet) {
+    Planet planet = (Planet) {
         .vao = vao,
         .vbo = vbo,
         .lit_tex = lit_tex,
@@ -51,15 +51,26 @@ Planet CreatePlanet(PlanetType type) {
         .dark_slot = dark_slot,
         .vertex_count = vertex_count,
     };
+
+    mat4 model = GLM_MAT4_IDENTITY_INIT;
+
+    vec3 radii, pos;
+    FetchPlanetRadii(planet_metas[type].cspice_target, radii);
+    FetchPlanetPosition(planet_metas[type].cspice_target, pos);
+
+    glm_translate_make(model, pos);
+    glm_scale(model, radii);
+    glm_mat4_copy(model, planet.model);
+
+    return planet;
 }
 
-void RenderPlanet(const Planet* planet, GLint model_loc, GLint lit_tex_loc, GLint dark_tex_loc) {
-    mat4 model = GLM_MAT4_IDENTITY_INIT;
-    glm_rotate(model, glm_rad(23.5f), (vec3) { 0.0f, 0.0f, 1.0f });
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, (const float*) model);
+void RenderPlanet(const Planet* planet, GLint model_loc, GLint lit_tex_loc, GLint dark_tex_loc, GLint bin_tex_loc) {
+    glUniformMatrix4fv(model_loc, 1, GL_FALSE, (const float*) planet->model);
 
     glUniform1i(lit_tex_loc, (GLint) planet->lit_slot);
     glUniform1i(dark_tex_loc, (GLint) planet->dark_slot);
+    glUniform1i(bin_tex_loc, (GLint) (planet->lit_tex != planet->dark_tex));
 
     glBindVertexArray(planet->vao);
     glDrawArrays(GL_TRIANGLES, 0, planet->vertex_count);

@@ -26,6 +26,8 @@ FetchContent_MakeAvailable(cglm)
 add_library(glad external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
+add_subdirectory(external/cspice)
+
 add_executable(accurate_solar_system
         src/main.c
         src/tools/program.h
@@ -44,16 +46,24 @@ add_executable(accurate_solar_system
         src/content/planet/planet_meta.h
         src/content/planet/planets.c
         src/content/planet/planets.h
+        src/content/planet/fetcher.c
+        src/content/planet/fetcher.h
 )
 
 add_library(stbi STATIC external/stbi/src/stb_image.c)
 
 target_include_directories(accurate_solar_system PRIVATE external/stbi/include)
 
-target_link_libraries(accurate_solar_system PRIVATE glfw glad cglm stbi)
+target_link_libraries(accurate_solar_system PRIVATE
+        glfw
+        glad
+        cglm
+        stbi
+        cspice
+)
 
 target_compile_definitions(accurate_solar_system PRIVATE
-        ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/"
         GLFW_INCLUDE_NONE
 )
 
@@ -62,3 +72,6 @@ target_compile_options(accurate_solar_system PRIVATE
         $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall>
         $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wextra>
 )
+
+target_compile_definitions(accurate_solar_system PRIVATE
+        KERNEL_DIR="${CMAKE_SOURCE_DIR}/external/cspice/kernels/")

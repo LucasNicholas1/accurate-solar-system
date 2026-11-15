@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
 
+static float sprint_mult = 1.0f;
+
 static void Reproject(Camera* camera);
 static void Move(Camera* camera, float delta);
 
@@ -30,7 +32,7 @@ void Reproject(Camera* camera) {
     int width, height;
     glfwGetFramebufferSize(camera->window, &width, &height);
     float aspect = (float) width / (float) height;
-    glm_perspective(camera->fov, aspect, 0.01f, 1000.0f, camera->proj);
+    glm_perspective(camera->fov, aspect, 0.001f, 1000.0f, camera->proj);
 }
 
 void UpdateCamera(Camera* camera, float delta) {
@@ -62,7 +64,13 @@ void RotateCamera(Camera* camera, float x_delta, float y_delta) {
 }
 
 void Move(Camera* camera, float delta) {
-    delta *= glfwGetKey(camera->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? 0.2f : 0.05f;
+    if (glfwGetKey(camera->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        sprint_mult += 1.0f * delta;
+    } else {
+        sprint_mult = fmaxf(sprint_mult - 1.0f * delta, 1.0f);
+    }
+
+    delta *= 0.0025f * sprint_mult;
 
     bool d = glfwGetKey(camera->window, GLFW_KEY_D) == GLFW_PRESS;
     bool a = glfwGetKey(camera->window, GLFW_KEY_A) == GLFW_PRESS;

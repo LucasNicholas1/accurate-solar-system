@@ -4,7 +4,7 @@
 
 static constexpr float PI = 3.1415926f;
 static constexpr float TAU = PI * 2.0f;
-static constexpr float RADIUS = 0.5f;
+static constexpr float RADIUS = 1.0f;
 
 int GetSphereVertexCount(int res) {
     return 12 * res * (res - 1);

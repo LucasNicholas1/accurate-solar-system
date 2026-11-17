@@ -64,10 +64,12 @@ void RotateCamera(Camera* camera, float x_delta, float y_delta) {
 }
 
 void Move(Camera* camera, float delta) {
+    constexpr float coe = 1.04f;
     if (glfwGetKey(camera->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        sprint_mult += 1.0f * delta;
+        sprint_mult *= powf(coe, delta);
     } else {
-        sprint_mult = fmaxf(sprint_mult - 1.0f * delta, 1.0f);
+        sprint_mult *= powf(1.0f / coe, delta);
+        sprint_mult = fmaxf(sprint_mult, 1.0f);
     }
 
     delta *= 0.0025f * sprint_mult;

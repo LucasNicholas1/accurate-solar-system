@@ -16,36 +16,31 @@ uniform vec3 uViewPos;
 uniform vec2 uFrameSize;
 
 void main() {
-    // World position of vertex
+    const float pi = 3.14159265;
+    const float minApparentArea = 5.0;
+
     vec3 vertexPos = (uModel * vec4(aPos, 1.0)).xyz;
-
-    // Distance from camera to planet center
     vec3 center = (uModel * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    float dst = length(center - uViewPos);
 
-    // Approximate projected planet area in pixels
-    float radius = max(length(vec3(
-                              uModel[0][0],
-                              uModel[1][0],
-                              uModel[2][0]
-                              )), 0.0001);
+    vec3 toCenter = center - uViewPos;
+    float dst = length(toCenter);
 
-    float projectedRadius = radius * uFrameSize.y / (2.0 * dst);
+    float radius = length(uModel[0].xyz);
+    float maxDst = radius * uFrameSize.y * 0.5 * sqrt(pi / minApparentArea);
+    float clampedDst = min(dst, maxDst);
 
-    float projectedArea = 3.14159265 * projectedRadius * projectedRadius;
-
-    // Minimum projected area: 1 pixel squared
-    float scale = sqrt(max(10.0, projectedArea) / max(projectedArea, 0.000001));
-//    float alpha = min(3.14159265 / (dst * dst), 1.0);
-    float alpha = 1.0;
-
-    // Scale around the planet center, not the world origin
-    vec3 adjustedPos = center + (vertexPos - center) * scale;
+    vec3 direction = dst > 0.0001 ? toCenter / dst : vec3(0.0, 0.0, 1.0);
+    vec3 adjustedCenter = uViewPos + direction * clampedDst;
+    vec3 adjustedPos = adjustedCenter + (vertexPos - center);
 
     gl_Position = uProj * uView * vec4(adjustedPos, 1.0);
 
     Pos = adjustedPos;
     Normal = normalize(transpose(inverse(mat3(uModel))) * aNormal);
     UV = aUV;
-    Alpha = alpha;
+
+    float projectedRadius = radius * uFrameSize.y / (2.0 * max(dst, 0.0001));
+    float projectedArea = pi * projectedRadius * projectedRadius;
+
+    Alpha = min(projectedArea / minApparentArea, 1.0);
 }

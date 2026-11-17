@@ -1,19 +1,21 @@
 #include "planets.h"
 
+#include "sphere.h"
 #include "fetcher.h"
 #include "planet_meta.h"
 #include "../camera/camera.h"
 #include "../../tools/program.h"
 #include <glad/glad.h>
-
-#include "../../../cmake-build-release/_deps/glfw-src/include/GLFW/glfw3.h"
+#include <glfw/glfw3.h>
 
 #define PLANET_COUNT PLANET_TYPE_COUNT
 
 typedef struct Planets {
     Camera* camera;
+    GLuint vbo;
     GLuint program;
     Planet arr[PLANET_COUNT];
+    int vertex_count;
     GLint proj_loc;
     GLint view_loc;
     GLint view_pos_loc;
@@ -25,6 +27,8 @@ typedef struct Planets {
 } Planets;
 
 static Planets planets;
+
+static GLuint createVBO(int res);
 
 void InitPlanets(Camera* camera) {
     planets.camera = camera;
@@ -42,10 +46,26 @@ void InitPlanets(Camera* camera) {
     InitPlanetMetas();
     InitFetcher();
 
+    constexpr int res = 20;
+    planets.vbo = createVBO(res);
+    planets.vertex_count = GetSphereComponentCount(res);
+
     // Make sure PLANET_COUNT planets are defined below
     for (int i = 0; i < PLANET_COUNT; i++) {
-        planets.arr[i] = CreatePlanet(i);
+        planets.arr[i] = CreatePlanet(i, planets.vbo);
     }
+}
+
+static GLuint createVBO(int res) {
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    float vertices[GetSphereComponentCount(res)];
+    GenerateSphere(res, vertices);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizei) sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    return vbo;
 }
 
 void UpdatePlanets(float delta) {
@@ -60,7 +80,7 @@ void UpdatePlanets(float delta) {
     glUniform2f(planets.frame_size_loc, (float) width, (float) height);
 
     for (int i = 0; i < PLANET_COUNT; i++) {
-        RenderPlanet(&planets.arr[i], planets.model_loc, planets.lit_tex_loc, planets.dark_tex_loc, planets.bin_tex_loc);
+        RenderPlanet(&planets.arr[i], planets.vertex_count, planets.model_loc, planets.lit_tex_loc, planets.dark_tex_loc, planets.bin_tex_loc);
     }
 }
 
@@ -71,5 +91,6 @@ void DisposePlanets() {
         DisposePlanet(&planets.arr[i]);
     }
 
+    glDeleteBuffers(1, &planets.vbo);
     glDeleteProgram(planets.program);
 }

@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
+#include <SOIL2.h>
 #include <assert.h>
 
 static GLuint slot_idx = 0;
@@ -42,6 +43,22 @@ unsigned int LoadTexture(const char* path, GLuint* slot) {
     return texture;
 }
 
-void DisposeTexture(unsigned int texture) {
-    glDeleteTextures(1, &texture);
+unsigned int LoadTextureDDS(const char* path, unsigned int* slot) {
+    GLuint texture = SOIL_load_OGL_texture(
+        path,
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y | SOIL_FLAG_MIPMAPS
+    );
+
+    if (texture == 0) {
+        fprintf(stderr, "Failed to load DDS texture %s: %s\n", path, SOIL_last_result());
+        return 0;
+    }
+
+    *slot = slot_idx++;
+    glActiveTexture(GL_TEXTURE0 + *slot);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    return texture;
 }

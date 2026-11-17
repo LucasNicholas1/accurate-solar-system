@@ -32,7 +32,7 @@ void Reproject(Camera* camera) {
     int width, height;
     glfwGetFramebufferSize(camera->window, &width, &height);
     float aspect = (float) width / (float) height;
-    glm_perspective(camera->fov, aspect, 0.001f, 1000.0f, camera->proj);
+    glm_perspective(camera->fov, aspect, 0.0001f, 100.0f, camera->proj);
 }
 
 void UpdateCamera(Camera* camera, float delta) {
@@ -72,7 +72,7 @@ void Move(Camera* camera, float delta) {
         sprint_mult = fmaxf(sprint_mult, 1.0f);
     }
 
-    delta *= 0.0025f * sprint_mult;
+    delta *= 0.0016f * sprint_mult;
 
     bool d = glfwGetKey(camera->window, GLFW_KEY_D) == GLFW_PRESS;
     bool a = glfwGetKey(camera->window, GLFW_KEY_A) == GLFW_PRESS;

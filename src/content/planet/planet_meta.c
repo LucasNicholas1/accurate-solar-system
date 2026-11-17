@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #define PATH_PREFIX ASSETS_DIR "textures/planets/"
-#define PATH_SUFFIX ".jpg"
+#define PATH_SUFFIX ".dds"
 #define PATH_SIZE 100
 
 static PlanetMeta Create(PlanetType type, int index);

@@ -23,8 +23,28 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cglm)
 
-add_library(glad external/glad/src/glad.c)
+file(GLOB SOIL2_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/external/soil2/srcs/*.c"
+)
+
+add_library(soil2 STATIC ${SOIL2_SOURCES})
+
+target_include_directories(soil2 PUBLIC
+        external/soil2/incs
+)
+
+add_library(glad STATIC external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
+
+find_package(OpenGL REQUIRED)
+
+target_include_directories(soil2 PRIVATE
+        external/glad/include
+)
+target_link_libraries(soil2 PUBLIC
+        glad
+        OpenGL::GL
+)
 
 add_subdirectory(external/cspice)
 
@@ -50,16 +70,16 @@ add_executable(accurate_solar_system
         src/content/planet/fetcher.h
 )
 
-add_library(stbi STATIC external/stbi/src/stb_image.c)
-
+#add_library(stbi STATIC external/stbi/src/stb_image.c)
 target_include_directories(accurate_solar_system PRIVATE external/stbi/include)
 
 target_link_libraries(accurate_solar_system PRIVATE
         glfw
-        glad
+#        glad
         cglm
-        stbi
+#        stbi
         cspice
+        soil2
 )
 
 target_compile_definitions(accurate_solar_system PRIVATE

@@ -46,7 +46,7 @@ void FetchPlanetPosition(const char* target, vec3 pos) {
     pos[1] = (float) spice_pos[2] * SCALE;
     pos[2] = (float) spice_pos[1] * SCALE;
 
-    printf("Fetched position: %f %f %f\n", pos[0], pos[1], pos[2]);
+    // printf("Fetched position: %f %f %f\n", pos[0], pos[1], pos[2]);
 }
 
 void FetchPlanetRadii(const char* target, vec3 radii) {
@@ -60,5 +60,5 @@ void FetchPlanetRadii(const char* target, vec3 radii) {
     radii[1] = (float) spice_radii[2] * SCALE * 1.0f;
     radii[2] = (float) spice_radii[1] * SCALE * 1.0f;
 
-    printf("Fetched radii: %f %f %f\n", radii[0], radii[1], radii[2]);
+    // printf("Fetched radii: %f %f %f\n", radii[0], radii[1], radii[2]);
 }

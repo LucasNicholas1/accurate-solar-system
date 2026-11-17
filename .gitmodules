@@ -1,0 +1,3 @@
+[submodule "external/soil2"]
+	path = external/soil2
+	url = https://github.com/alelievr/SOIL2.git

@@ -19,7 +19,7 @@ unsigned int LoadTexture(const char* path, GLuint* slot) {
         return 0;
     }
 
-    assert(channels == 3 || channels == 4 && "Channels of texture must be RGBA");
+    assert((channels == 3 || channels == 4) && "Channels of texture must be RGBA");
     GLenum format = channels == 3 ? GL_RGB : GL_RGBA;
 
     GLuint texture;
@@ -44,6 +44,9 @@ unsigned int LoadTexture(const char* path, GLuint* slot) {
 }
 
 unsigned int LoadTextureDDS(const char* path, unsigned int* slot) {
+    *slot = slot_idx++;
+    glActiveTexture(GL_TEXTURE0 + *slot);
+
     GLuint texture = SOIL_load_OGL_texture(
         path,
         SOIL_LOAD_AUTO,
@@ -51,14 +54,12 @@ unsigned int LoadTextureDDS(const char* path, unsigned int* slot) {
         SOIL_FLAG_INVERT_Y | SOIL_FLAG_MIPMAPS
     );
 
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     if (texture == 0) {
         fprintf(stderr, "Failed to load DDS texture %s: %s\n", path, SOIL_last_result());
         return 0;
     }
-
-    *slot = slot_idx++;
-    glActiveTexture(GL_TEXTURE0 + *slot);
-    glBindTexture(GL_TEXTURE_2D, texture);
 
     return texture;
 }
